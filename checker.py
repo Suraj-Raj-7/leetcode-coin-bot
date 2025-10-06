@@ -61,5 +61,18 @@ def check_for_leetcoins():
     except Exception as e:
         print(f"An error occurred: {e}")
 
+print("Checking LeetCode contest page...")
+    try:
+        response = requests.get(LEETCODE_CONTEST_URL, headers=headers)
+        response.raise_for_status()
+        page_content = response.text
+
+        # --- ADD THIS DEBUGGING LINE ---
+        print("--- START OF PAGE HTML ---")
+        print(page_content)
+        print("--- END OF PAGE HTML ---")
+
+        soup = BeautifulSoup(page_content, 'html.parser')
+
 if __name__ == "__main__":
     check_for_leetcoins()
