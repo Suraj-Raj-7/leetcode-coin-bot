@@ -1,5 +1,6 @@
 import os
 import requests
+from bs4 import BeautifulSoup
 
 # --- Configuration (Loaded from GitHub Secrets) ---
 LEETCODE_COOKIE = os.environ.get("LEETCODE_COOKIE")
@@ -26,7 +27,7 @@ def send_telegram_message(message):
         print(f"Error sending Telegram message: {e}")
 
 def check_for_leetcoins():
-    """Checks the LeetCode contest page for redeemable LeetCoins."""
+    """Checks the LeetCode contest page for the reward element."""
     if not all([LEETCODE_COOKIE, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID]):
         print("Error: Required secrets are not set. Aborting.")
         return
@@ -40,18 +41,25 @@ def check_for_leetcoins():
     try:
         response = requests.get(LEETCODE_CONTEST_URL, headers=headers)
         response.raise_for_status()
-        page_content = response.text.lower() # Convert to lower case for easy searching
+        page_content = response.text
 
-        # Keywords to look for that indicate LeetCoins are available
-        if "redeem" in page_content or "leetcodes" in page_content:
-            print("Success! LeetCoins might be available.")
-            message = f"🪙 **LeetCoins might be available!**\n\nCheck the contest page now:\n{LEETCODE_CONTEST_URL}"
+        soup = BeautifulSoup(page_content, 'html.parser')
+
+        # Find the container div by the unique positional class you confirmed.
+        # <-- THIS IS THE KEY LINE YOU CONFIRMED
+        reward_element = soup.find('div', class_='z-base-1')
+
+        if reward_element:
+            # Get the text from the button to include in the message
+            reward_text = reward_element.get_text(strip=True)
+            print(f"Success! Found reward element with text: '{reward_text}'")
+            message = f"🪙 **A special reward might be available on LeetCode!**\n\nButton text: *\"{reward_text}\"*\n\nCheck the contest page now:\n{LEETCODE_CONTEST_URL}"
             send_telegram_message(message)
         else:
-            print("No LeetCoins found on the page this time.")
+            print("No special reward element found on the page this time.")
 
     except Exception as e:
-        print(f"An error occurred while fetching the LeetCode page: {e}")
+        print(f"An error occurred: {e}")
 
 if __name__ == "__main__":
     check_for_leetcoins()
