@@ -38,19 +38,23 @@ def check_for_leetcoins():
     }
 
     print("Checking LeetCode contest page...")
+    
     try:
         response = requests.get(LEETCODE_CONTEST_URL, headers=headers)
         response.raise_for_status()
         page_content = response.text
 
+        # --- Debugging lines to see what the bot sees ---
+        print("--- START OF PAGE HTML ---")
+        print(page_content)
+        print("--- END OF PAGE HTML ---")
+
         soup = BeautifulSoup(page_content, 'html.parser')
 
-        # Find the container div by the unique positional class you confirmed.
-        # <-- THIS IS THE KEY LINE YOU CONFIRMED
+        # Find the container div by its unique positional class
         reward_element = soup.find('div', class_='z-base-1')
 
         if reward_element:
-            # Get the text from the button to include in the message
             reward_text = reward_element.get_text(strip=True)
             print(f"Success! Found reward element with text: '{reward_text}'")
             message = f"🪙 **A special reward might be available on LeetCode!**\n\nButton text: *\"{reward_text}\"*\n\nCheck the contest page now:\n{LEETCODE_CONTEST_URL}"
@@ -61,18 +65,6 @@ def check_for_leetcoins():
     except Exception as e:
         print(f"An error occurred: {e}")
 
-print("Checking LeetCode contest page...")
-    try:
-        response = requests.get(LEETCODE_CONTEST_URL, headers=headers)
-        response.raise_for_status()
-        page_content = response.text
-
-        # --- ADD THIS DEBUGGING LINE ---
-        print("--- START OF PAGE HTML ---")
-        print(page_content)
-        print("--- END OF PAGE HTML ---")
-
-        soup = BeautifulSoup(page_content, 'html.parser')
-
 if __name__ == "__main__":
     check_for_leetcoins()
+    
